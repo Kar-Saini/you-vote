@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "You-Vote",
+  "version": "1.0.0",
+  "description": "Chrome extension providing ",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "icons": {},
+
+  "content_scripts": [
+    {
+      "js": ["src/content.jsx"],
+      "matches": ["https://*.youtube.com/*"]
+    }
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  }
+}

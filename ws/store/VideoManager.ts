@@ -2,7 +2,7 @@ import type { VoteType } from "../utils/type";
 import { Poll } from "./Poll";
 
 export class VideoManager {
-  public polls: Poll[] = [];
+  public videoPolls: Record<string, Poll[]> = {};
   public static instance: VideoManager;
 
   private constructor() {}
@@ -14,25 +14,29 @@ export class VideoManager {
     return VideoManager.instance;
   }
 
-  addPoll(videoId: string, pollContent: string) {
-    const poll = new Poll(videoId, pollContent);
-    this.polls.push(poll);
-    return poll.pollId;
-  }
-
   getAllPolls(videoId: string) {
-    const polls = this.polls.map((poll) => poll.videoId === videoId);
+    const polls = this.videoPolls[videoId];
+    if (!polls) return "No polls yet";
     return polls;
   }
-
-  vote(pollId: string, userId: string, voteType: VoteType) {
-    this.polls.forEach((poll) => {
-      if (poll.pollId === pollId) poll.addVote(userId, voteType);
-    });
+  addPoll(videoId: string, pollContent: string) {
+    const poll = new Poll(videoId, pollContent);
+    let videoPolls = this.videoPolls[videoId];
+    if (!videoPolls) videoPolls = [];
+    videoPolls.push(poll);
   }
-  getPollCounts(pollId: string) {
-    const poll = this.polls.find((poll) => poll.pollId === pollId);
-    if (!poll) return "Invalid Poll ID";
-    return { upvotes: poll.upvotes, downvotes: poll.downvotes };
+
+  vote(videoId: string, pollId: string, userId: string, voteType: VoteType) {
+    this.videoPolls[videoId]
+      ?.find((poll) => poll.pollId === pollId)
+      ?.addVote(userId, voteType);
+  }
+  getPollCounts(videoId: string, pollId: string) {
+    const poll = this.videoPolls[videoId]?.find(
+      (poll) => poll.pollId === pollId
+    );
+    if (!poll) return "No poll";
+
+    return { upvotes: poll?.upvotes, downvotes: poll?.downvotes };
   }
 }

@@ -1,14 +1,8 @@
-interface Video {
-  videoId: string;
-  creatorId: string;
-}
-
-export enum VoteType {
-  Upvote,
-  Downvote,
-}
-
-export type INCOMING_MESSAGE =
+export type INCOMING_MESSAGE = {
+  type: "polls";
+  payload: string;
+};
+export type OUTGOING_MESSAGE =
   | {
       type: "get-polls";
       payload: { videoId: string };
@@ -23,7 +17,6 @@ export type INCOMING_MESSAGE =
         videoId: string;
         pollId: string;
         userId: string;
-
         voteType: "upvote" | "downvote";
       };
     }
