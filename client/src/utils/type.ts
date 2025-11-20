@@ -1,7 +1,12 @@
-export type INCOMING_MESSAGE = {
-  type: "polls";
-  payload: string;
-};
+export type INCOMING_MESSAGE =
+  | {
+      type: "polls";
+      payload: unknown;
+    }
+  | {
+      type: "connection";
+      payload: string;
+    };
 export type OUTGOING_MESSAGE =
   | {
       type: "get-polls";

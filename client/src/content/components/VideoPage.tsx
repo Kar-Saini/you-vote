@@ -1,39 +1,56 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState,  } from "react";
 import type { INCOMING_MESSAGE } from "../../utils/type";
 
 const VideoPage = ({ videoId }: { videoId: string }) => {
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [polls, setPolls] = useState([]);
+   const socketRef = useRef<WebSocket | null>(null);
+  const[message, setMessage] = useState("")
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");
+    socketRef.current = ws;
 
-    ws.onopen = () => {
-      setSocket(ws);
-      socket?.send(JSON.stringify({ type: "get-polls", payload: { videoId } }));
+    ws.onopen = () => {console.log("WS connected")
+      ws.send(
+      JSON.stringify({
+        type: "get-polls",
+        payload: { videoId },
+      })
+    );
     };
+    ws.onclose = () => console.log("WS closed");
+    ws.onerror = (err) => console.log("WS error", err);
 
     ws.onmessage = (event) => {
-      const parsedEvent:INCOMING_MESSAGE = JSON.parse(event.data);
-      
-      switch(parsedEvent.type){
+      const parsedEvent: INCOMING_MESSAGE = JSON.parse(event.data);
+
+      switch (parsedEvent.type) {
         case "polls":
-          
+          console.log("Received list of polls:", parsedEvent.payload);
+          setMessage(JSON.stringify(parsedEvent.payload));
+          break;
+
+        case "connection":
+          console.log(parsedEvent.payload);
+          setMessage(parsedEvent.payload)
+          break;
       }
-
-      console.log("Message from server:", event.data);
-    };
-    ws.onclose = () => {
-      console.log("WebSocket connection closed");
     };
 
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-    return () => {
-      ws.close();
-    };
+
+    return () => ws.close();
   }, [videoId]);
+
+  useEffect(() => {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
+
+    socketRef.current.send(
+      JSON.stringify({
+        type: "get-polls",
+        payload: { videoId },
+      })
+    );
+
+  }, [ videoId]);
 
   return (
     <div>
@@ -42,8 +59,10 @@ const VideoPage = ({ videoId }: { videoId: string }) => {
         <p className="text-sm break-all text-gray-500">{videoId}</p>
       </div>
 
-      <div className="border p-3 rounded-lg shadow-sm hover:bg-gray-50">
-        <p className="font-semibold">Make a video about sleep schedule</p>
+      {message}
+
+      <div className="border p-3 rounded-lg shadow-sm hover:bg-gray-50 mt-4">
+        <p className="font-semibold">Example Poll</p>
 
         <div className="flex items-center gap-4 mt-2">
           <button className="px-3 py-1 rounded-lg bg-green-500 text-white">
@@ -53,10 +72,6 @@ const VideoPage = ({ videoId }: { videoId: string }) => {
             👎 12
           </button>
         </div>
-      </div>
-
-      <div className="text-gray-500 text-center text-sm">
-        More polls coming soon…
       </div>
     </div>
   );

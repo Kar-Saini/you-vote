@@ -9,6 +9,7 @@ export class Poll {
   public votes: Vote[];
   public upvotes: number;
   public downvotes: number;
+  public timestamp: number;
 
   constructor(videoId: string, pollContent: string) {
     this.pollId = generateId(15);
@@ -17,6 +18,7 @@ export class Poll {
     this.votes = [];
     this.downvotes = 0;
     this.upvotes = 0;
+    this.timestamp = Date.now();
   }
 
   addVote(userId: string, voteType: VoteType) {

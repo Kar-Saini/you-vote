@@ -10,8 +10,17 @@ const wss = new WebSocketServer(
 );
 
 wss.on("connection", (ws) => {
+  console.log("Connected");
+  console.log(JSON.stringify(ws));
+  ws.send(
+    JSON.stringify({
+      type: "connection",
+      payload: "Connected to websocket server",
+    })
+  );
   ws.onmessage = (event) => {
     const parsedData: INCOMING_MESSAGE = JSON.parse(event.data.toString());
+    console.log(parsedData);
 
     switch (parsedData.type) {
       case "get-polls": {
